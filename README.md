@@ -75,20 +75,24 @@ We have rigorously tested Vegha against industry baselines.
 ## 📊 Visual Intelligence & Architecture
 
 ### 1. Overall System Architecture
-*A high-level view of how Edge Nodes, the Federated Server, and the City Dashboard interact.*
+*High-level interaction between Edge Nodes, Server, and Dashboard.*
 ![Overall System Architecture](resources/Overalldfd.png)
 
-### 2. Technical Data Flow (DFD)
-*Detailed packet flow demonstrating the privacy-preserving "Gradient-Only" transmission protocol.*
-![Technical Data Flow](resources/technical%20arch.png)
+### 2. System Architecture
+*Core architectural components and their connectivity.*
+![System Architecture](resources/technical%20arch.png)
 
-### 3. Competitor Analysis Table
-*Feature-by-feature comparison against SCATS, SCOOT, and standard Fixed-Time controllers.*
-![Competitor Analysis](resources/compitor.png)
+### 3. Technical Implementation
+*Deep dive into the technical stack and data flow.*
+![Technical Implementation](resources/technical.drawio.png)
 
 ### 4. Simulation Results
-*Performance graphs showing wait-time reduction across 100+ simulated training episodes.*
+*Performance benchmarks showing wait-time reduction.*
 ![Simulation Results](resources/results.png)
+
+### 5. Competitor Analysis
+*Comparison against SCATS, SCOOT, and Fixed-Time systems.*
+![Competitor Analysis](resources/compitor.png)
 
 ---
 
@@ -108,33 +112,9 @@ We have rigorously tested Vegha against industry baselines.
 
 Vegha operates on a **Federated Learning** model where each intersection is an independent learner.
 
-### Data Flow Diagram (DFD)
+### Data Flow
 
-```mermaid
-graph TD
-    subgraph Edge["Edge Layer (Intersections)"]
-        A[Camera Feed] -->|Process| B[YOLOv8 Detection]
-        B -->|Vehicle Counts| C[Local RL Agent]
-        C -->|Signal Control| D[Traffic Lights]
-        C -->|Model Weights| E[Federated Client]
-    end
-
-    subgraph Cloud["Cloud / Server Layer"]
-        E -->|Encrypted Gradients| F[Federated Server]
-        F -->|Global Aggregation| G[Global Model]
-        G -->|Updated Weights| E
-        H[Emergency Event] -->|Override Command| F
-    end
-
-    subgraph User["User Layer"]
-        F -->|Real-time Analytics| I[Dashboard]
-        I -->|Manual Override| F
-    end
-
-    style Edge fill:#e1f5fe,stroke:#01579b
-    style Cloud fill:#fff3e0,stroke:#ff6f00
-    style User fill:#f3e5f5,stroke:#7b1fa2
-```
+The system operates on a decentralized model where locally processed insights are shared via lightweight JSON payloads, bypassing the need for video streaming.
 
 ---
 
