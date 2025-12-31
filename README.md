@@ -28,7 +28,7 @@ Vegha is an AI-powered traffic management platform that connects a live SUMO tra
 
 <div align="center">
   <a href="https://youtu.be/7rYoW2CGFH0">
-    <img src="https://img.youtube.com/vi/7rYoW2CGFH0/0.jpg" alt="Website Demo" width="100%">
+    <img src="https://img.youtube.com/vi/7rYoW2CGFH0/maxresdefault.jpg" alt="Website Demo" width="100%">
   </a>
 </div>
 
@@ -37,7 +37,7 @@ Watch Vegha tackle the massive traffic chaos of a Coldplay concert exit, transfo
 
 <div align="center">
   <a href="https://youtu.be/Dss-J9jrGe0">
-    <img src="https://img.youtube.com/vi/Dss-J9jrGe0/0.jpg" alt="Coldplay Traffic Solution" width="100%">
+    <img src="https://img.youtube.com/vi/Dss-J9jrGe0/maxresdefault.jpg" alt="Coldplay Traffic Solution" width="100%">
   </a>
 </div>
 
@@ -46,7 +46,7 @@ This video demonstrates how edge computing powers Vegha’s intelligent traffic 
 
 <div align="center">
   <a href="https://youtube.com/shorts/-pVcdBaw4GY">
-    <img src="https://img.youtube.com/vi/-pVcdBaw4GY/0.jpg" alt="Edge Computing Demo" width="100%">
+    <img src="https://img.youtube.com/vi/-pVcdBaw4GY/maxresdefault.jpg" alt="Edge Computing Demo" width="100%">
   </a>
 </div>
 
@@ -55,7 +55,7 @@ This video showcases a side‑by‑side comparison between the existing traffic 
 
 <div align="center">
   <a href="https://youtu.be/V8MBIYzJWPc">
-    <img src="https://img.youtube.com/vi/V8MBIYzJWPc/0.jpg" alt="Vegha vs Current Model" width="100%">
+    <img src="https://img.youtube.com/vi/V8MBIYzJWPc/maxresdefault.jpg" alt="Vegha vs Current Model" width="100%">
   </a>
 </div>
 
