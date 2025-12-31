@@ -19,19 +19,16 @@ Urban traffic in the Global South is chaotic, unstructured, and rapidly expandin
 
 ## 🎥 Demo & Validation
 
-We have rigorously tested Vegha against industry baselines.
+> [!NOTE]
+> **Detailed Documentation**: For a complete breakdown of features, architecture, and business validation, refer to our [Presentation Deck (PDF)](resources/vehga_v1.pdf).
 
-### 1. Vegha vs. Fixed Signal (Normal Traffic)
-*Demonstrates how Vegha reduces average wait time during standard daily traffic fluctuations compared to static timers.*
-[Link to Video: Vegha vs Fixed Normal]
+### 1. Website Demo
+*Vegha is an AI-powered traffic management platform that connects a live SUMO simulation to a modern Next.js dashboard, enabling real‑time monitoring of vehicles, signals, and congestion metrics. In this demo, we showcase dynamic maps, live ambulance prioritization, and interactive controls to close or reopen streets during events like accidents or roadworks. You’ll also see how traffic events are created from the dashboard and immediately reflected in the running simulation for true city‑scale scenario testing. Built with Socket.IO, Leaflet, and a Flask backend, Vegha demonstrates how reinforcement learning and smart control can transform urban mobility.*
+[![Website Demo](https://img.youtube.com/vi/V8MBIYzJWPc/0.jpg)](https://youtu.be/V8MBIYzJWPc)
 
-### 2. Vegha vs. Fixed Signal (High Intensity / Coldplay Event)
-*Demonstrates system resilience during massive, sudden congestion events (e.g., concert egress), preventing gridlock where fixed timers fail.*
-[Link to Video: Vegha vs Fixed Event]
-
-### 3. Edge Device Real-Time Detection
-*Live footage from the edge node showing YOLOv8 detection and privacy-preserving counting in real-time.*
-[Link to Video: Edge Device Detection]
+### 2. Comparison: Vegha vs. Fixed Signal
+*This video showcases a side‑by‑side comparison between the existing traffic control approach and our Vegha‑powered model on the same road network and conditions. You’ll see how our system reduces congestion, lowers waiting time, and prioritizes ambulances and emergency vehicles more efficiently than the current setup. The demo highlights key metrics like vehicle throughput, average speed, and signal responsiveness to clearly show performance gains. Watch to understand how intelligent, data‑driven traffic management can transform everyday commuting and emergency response in urban areas.*
+[![Comparison](https://img.youtube.com/vi/Dss-J9jrGe0/0.jpg)](https://youtu.be/Dss-J9jrGe0)
 
 ---
 
