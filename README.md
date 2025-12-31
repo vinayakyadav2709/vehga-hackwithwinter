@@ -27,8 +27,8 @@ Urban traffic in the Global South is chaotic, unstructured, and rapidly expandin
 Vegha is an AI-powered traffic management platform that connects a live SUMO traffic engine to a modern Next.js dashboard, enabling real‑time monitoring of vehicles, signals, and congestion metrics. In this demo, we showcase dynamic maps, live ambulance prioritization, and interactive controls to close or reopen streets during events like accidents or roadworks. You’ll also see how traffic events are created from the dashboard and immediately reflected in the running traffic environment for true city‑scale scenario testing. Built with Socket.IO, Leaflet, and a Flask backend, Vegha demonstrates how reinforcement learning and smart control can transform urban mobility.
 
 <div align="center">
-  <a href="https://youtu.be/7rYoW2CGFH0">
-    <img src="https://img.youtube.com/vi/7rYoW2CGFH0/maxresdefault.jpg" alt="Website Demo" width="100%">
+  <a href="https://www.youtube.com/embed/7rYoW2CGFH0?autoplay=1">
+    <img src="https://img.youtube.com/vi/7rYoW2CGFH0/hqdefault.jpg" alt="Website Demo" width="100%">
   </a>
 </div>
 
@@ -36,8 +36,8 @@ Vegha is an AI-powered traffic management platform that connects a live SUMO tra
 Watch Vegha tackle the massive traffic chaos of a Coldplay concert exit, transforming gridlock into smooth flow with intelligent signal control and dynamic rerouting. Our system prioritizes ambulances through the crowd surge, closes event streets strategically, and optimizes every intersection for maximum throughput. See dramatic improvements in emergency response times, vehicle speeds, and congestion clearance compared to traditional fixed signals. Vegha proves it can handle real-world mega-events with precision and speed.
 
 <div align="center">
-  <a href="https://youtu.be/Dss-J9jrGe0">
-    <img src="https://img.youtube.com/vi/Dss-J9jrGe0/maxresdefault.jpg" alt="Coldplay Traffic Solution" width="100%">
+  <a href="https://www.youtube.com/embed/Dss-J9jrGe0?autoplay=1">
+    <img src="https://img.youtube.com/vi/Dss-J9jrGe0/hqdefault.jpg" alt="Coldplay Traffic Solution" width="100%">
   </a>
 </div>
 
@@ -45,8 +45,8 @@ Watch Vegha tackle the massive traffic chaos of a Coldplay concert exit, transfo
 This video demonstrates how edge computing powers Vegha’s intelligent traffic control in a real-world setup using a low-cost device equivalent in cost to our deployed roadside hardware. You’ll see how critical decisions like signal timing, congestion detection, and ambulance prioritization are processed directly at the edge instead of relying on the cloud. The demo highlights reduced latency, higher reliability during network issues, and continuous operation even with limited connectivity. Watch how an affordable on-device deployment can still deliver high-performance, real-time traffic management for smart cities.
 
 <div align="center">
-  <a href="https://youtube.com/shorts/-pVcdBaw4GY">
-    <img src="https://img.youtube.com/vi/-pVcdBaw4GY/maxresdefault.jpg" alt="Edge Computing Demo" width="100%">
+  <a href="https://www.youtube.com/embed/-pVcdBaw4GY?autoplay=1">
+    <img src="https://img.youtube.com/vi/-pVcdBaw4GY/hqdefault.jpg" alt="Edge Computing Demo" width="100%">
   </a>
 </div>
 
@@ -54,8 +54,8 @@ This video demonstrates how edge computing powers Vegha’s intelligent traffic 
 This video showcases a side‑by‑side comparison between the existing traffic control approach and our Vegha‑powered model on the same road network and conditions. You’ll see how our system reduces congestion, lowers waiting time, and prioritizes ambulances and emergency vehicles more efficiently than the current setup. The demo highlights key metrics like vehicle throughput, average speed, and signal responsiveness to clearly show performance gains. Watch to understand how intelligent, data‑driven traffic management can transform everyday commuting and emergency response in urban areas.
 
 <div align="center">
-  <a href="https://youtu.be/V8MBIYzJWPc">
-    <img src="https://img.youtube.com/vi/V8MBIYzJWPc/maxresdefault.jpg" alt="Vegha vs Current Model" width="100%">
+  <a href="https://www.youtube.com/embed/V8MBIYzJWPc?autoplay=1">
+    <img src="https://img.youtube.com/vi/V8MBIYzJWPc/hqdefault.jpg" alt="Vegha vs Current Model" width="100%">
   </a>
 </div>
 
