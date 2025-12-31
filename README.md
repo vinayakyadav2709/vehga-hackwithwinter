@@ -169,7 +169,7 @@ We address the critical challenge of privacy in surveillance.
 Vegha goes beyond simple signal timing. It understands context.
 
 *   **Emergency Vehicle Prioritization**: Computer vision detects ambulances/fire trucks and preemptively clears the corridor (Green Wave).
-*   **Scheduled Events**: "Coldplay Concert" mode pre-configures routes for massive egress, preventing post-event gridlock.
+*   **Event Management**: An adaptable system for massive egress management during diverse scenarios like rallies, elections, or road construction, ensuring smooth flow regardless of the cause.
 *   **Road Closures and Diversions**: Operators can mark closed roads on the dashboard, and agents instantly reroute traffic flow logic across the neighborhood.
 *   **Graceful Degradation**: In case of camera failure, the system falls back to a robust historical timing profile, ensuring safety.
 
@@ -181,14 +181,14 @@ Vegha goes beyond simple signal timing. It understands context.
 *   **Low Total Cost of Ownership (TCO)**:
     *   **Hardware**: Off-the-shelf compute ($100 vs $5000 proprietary controllers).
     *   **Connectivity**: Uses standard 4G SIMs instead of dedicated fiber.
-*   **API Monetization**: Anonymized traffic density data is exposed via API for logistics companies, ride-sharing apps, and urban planners.
+*   **API Monetization & Public Services**: Anonymized traffic density data is exposed via API for logistics, ride-sharing apps, and government portals to enable route finding and wait-time expectations (similar to the Chalo app).
 
 ---
 
 ## 📈 Scalability & City-Wide Expansion
 
 *   **Zero-Touch Provisioning**: New intersections are auto-discovered. Just power on the device, and it joins the federated network.
-*   **Global South Scalability**: Designed specifically for the chaotic, diverse traffic of Indian cities—handling autos, bikes, and cows with equal precision.
+*   **Global South Scalability**: Designed specifically for the chaotic, diverse traffic of Indian cities—handling autos, bikes, and adverse weather conditions like fog and rain with equal precision.
 *   **SaaS-Based Analytics**: The command center scales horizontally on the cloud, managing 10 to 10,000 intersections seamlessly.
 
 ---
