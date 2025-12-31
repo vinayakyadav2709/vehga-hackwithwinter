@@ -1,11 +1,12 @@
 # Vegha: Decentralized Edge-First Traffic Intelligence
 
-## 🚦 Problem Statement: The Gridlock of Indian Cities
-
-> [!TIP]
+> [!Project Links]
 > **🟢 Live Deployment**: This system is currently deployed and active.
 > *   **Dashboard**: [vegha.vikasrajyadav.com](https://vegha.vikasrajyadav.com)
 > *   **API**: [api.vegha.vikasrajyadav.com](https://api.vegha.vikasrajyadav.com)
+
+## 🚦 Problem Statement: The Gridlock of Indian Cities
+
 
 Urban traffic in the Global South is chaotic, unstructured, and rapidly expanding. Existing solutions—Adaptive Traffic Control Systems (ATCS)—fail in this context because:
 
