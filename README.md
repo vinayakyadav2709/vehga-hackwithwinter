@@ -1,6 +1,6 @@
 # Vegha: Decentralized Edge-First Traffic Intelligence
 
-> [!Project Links]
+> [!Note]
 > **🟢 Live Deployment**: This system is currently deployed and active.
 > *   **Dashboard**: [vegha.vikasrajyadav.com](https://vegha.vikasrajyadav.com)
 > *   **API**: [api.vegha.vikasrajyadav.com](https://api.vegha.vikasrajyadav.com)
