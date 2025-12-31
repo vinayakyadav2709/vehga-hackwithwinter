@@ -28,7 +28,7 @@ Vegha is an AI-powered traffic management platform that connects a live SUMO tra
 
 <div align="center">
   <a href="https://www.youtube.com/embed/7rYoW2CGFH0?autoplay=1">
-    <img src="https://img.youtube.com/vi/7rYoW2CGFH0/hqdefault.jpg" alt="Website Demo" width="100%">
+    <img src="https://img.youtube.com/vi/7rYoW2CGFH0/maxresdefault.jpg" alt="Website Demo" width="100%">
   </a>
 </div>
 
@@ -37,7 +37,7 @@ Watch Vegha tackle the massive traffic chaos of a Coldplay concert exit, transfo
 
 <div align="center">
   <a href="https://www.youtube.com/embed/Dss-J9jrGe0?autoplay=1">
-    <img src="https://img.youtube.com/vi/Dss-J9jrGe0/hqdefault.jpg" alt="Coldplay Traffic Solution" width="100%">
+    <img src="https://img.youtube.com/vi/Dss-J9jrGe0/maxresdefault.jpg" alt="Coldplay Traffic Solution" width="100%">
   </a>
 </div>
 
@@ -55,7 +55,7 @@ This video showcases a side‑by‑side comparison between the existing traffic 
 
 <div align="center">
   <a href="https://www.youtube.com/embed/V8MBIYzJWPc?autoplay=1">
-    <img src="https://img.youtube.com/vi/V8MBIYzJWPc/hqdefault.jpg" alt="Vegha vs Current Model" width="100%">
+    <img src="https://img.youtube.com/vi/V8MBIYzJWPc/maxresdefault.jpg" alt="Vegha vs Current Model" width="100%">
   </a>
 </div>
 
