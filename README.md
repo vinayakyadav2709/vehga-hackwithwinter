@@ -1,9 +1,11 @@
 # Vegha: Decentralized Edge-First Traffic Intelligence
 
-> [!IMPORTANT]
-> **Hackathon Submission**: This system is designed for **Evaluation Mode**. It prioritizes **Edge Computing**, **Decentralized Intelligence**, and **Brownfield Deployment** over traditional centralized, fiber-heavy approaches.
+## 🚦 Problem Statement: The Gridlock of Indian Cities
 
-## � Problem Statement: The Gridlock of Indian Cities
+> [!TIP]
+> **🟢 Live Deployment**: This system is currently deployed and active.
+> *   **Dashboard**: [vegha.vikasrajyadav.com](https://vegha.vikasrajyadav.com)
+> *   **API**: [api.vegha.vikasrajyadav.com](https://api.vegha.vikasrajyadav.com)
 
 Urban traffic in the Global South is chaotic, unstructured, and rapidly expanding. Existing solutions—Adaptive Traffic Control Systems (ATCS)—fail in this context because:
 
@@ -12,6 +14,81 @@ Urban traffic in the Global South is chaotic, unstructured, and rapidly expandin
 3.  **Latency**: Round-trip time to a cloud server prevents real-time reaction to sudden events (accidents, ambulances).
 
 **Vegha solves this by shifting intelligence to the edge.** We don't just "manage" traffic; we create **Autonomous Intersection Agents** that collaborate to optimize flow without a central brain.
+
+---
+
+## 🎥 Demo & Validation
+
+We have rigorously tested Vegha against industry baselines.
+
+### 1. Vegha vs. Fixed Signal (Normal Traffic)
+*Demonstrates how Vegha reduces average wait time during standard daily traffic fluctuations compared to static timers.*
+[Link to Video: Vegha vs Fixed Normal]
+
+### 2. Vegha vs. Fixed Signal (High Intensity / Coldplay Event)
+*Demonstrates system resilience during massive, sudden congestion events (e.g., concert egress), preventing gridlock where fixed timers fail.*
+[Link to Video: Vegha vs Fixed Event]
+
+### 3. Edge Device Real-Time Detection
+*Live footage from the edge node showing YOLOv8 detection and privacy-preserving counting in real-time.*
+[Link to Video: Edge Device Detection]
+
+---
+
+## 💻 Deployment & Running Instructions
+
+> [!TIP]
+> **Professional Grade Setup**: This system utilizes `docker-compose` for a "one-click" production deployment. Ensure Docker Desktop is running before proceeding.
+
+### Prerequisites
+*   Docker & Docker Compose
+*   Python 3.8+ (for local scripts)
+*   Node.js 18+ (for frontend development)
+
+### Quick Start (Production Mode)
+
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/vinayakyadav2709/vegha-hackwithwinter
+    cd vegha-hackwithwinter
+    ```
+
+2.  **Launch the System**
+    This command orchestrates the Federated Server, Dashboard, and Map Services.
+    ```bash
+    docker-compose up --build -d
+    ```
+
+3.  **Access Interfaces**
+    *   **Traffic Authority Dashboard**: [http://localhost:3000](http://localhost:3000) (or live at `vegha.vikasrajyadav.com`)
+    *   **API Documentation**: [http://localhost:5000/api/docs](http://localhost:5000/api/docs) (or live at `api.vegha.vikasrajyadav.com`)
+
+4.  **Connect an Edge Agent** (Optional)
+    To connect a physical edge device (Jetson/Pi) or run the software simulation agent:
+    ```bash
+    cd FDRL
+    python federated_client.py --connect wss://api.vegha.vikasrajyadav.com
+    ```
+
+---
+
+## 📊 Visual Intelligence & Architecture
+
+### 1. Overall System Architecture
+*A high-level view of how Edge Nodes, the Federated Server, and the City Dashboard interact.*
+![Overall System Architecture](resources/Overalldfd.png)
+
+### 2. Technical Data Flow (DFD)
+*Detailed packet flow demonstrating the privacy-preserving "Gradient-Only" transmission protocol.*
+![Technical Data Flow](resources/technical%20arch.png)
+
+### 3. Competitor Analysis Table
+*Feature-by-feature comparison against SCATS, SCOOT, and standard Fixed-Time controllers.*
+![Competitor Analysis](resources/compitor.png)
+
+### 4. Simulation Results
+*Performance graphs showing wait-time reduction across 100+ simulated training episodes.*
+![Simulation Results](resources/results.png)
 
 ---
 
@@ -92,7 +169,7 @@ Vegha goes beyond simple signal timing. It understands context.
 
 ---
 
-## � Cost & Deployment Economics
+## 💰 Cost & Deployment Economics
 
 *   **Brownfield Deployment**: Works with existing CCTV cameras and signal poles. No need to dig up roads.
 *   **Low Total Cost of Ownership (TCO)**:
@@ -110,14 +187,14 @@ Vegha goes beyond simple signal timing. It understands context.
 
 ---
 
-## � Future Scope (Round 2 Improvements)
+## 🚀 Future Scope (Round 2 Improvements)
 
-We have a clear roadmap to move from prototype to pilot.
+We have a clear roadmap to move from prototype to pilot, focusing on high-fidelity integration.
 
-1.  **LoRaWAN Integration**: Replace 4G with long-range, low-power LoRaWAN for even robust communication in signal-shadow zones.
-2.  ** Blockchain for Data Integrity**: Hash traffic logs on an immutable ledger to prevent tampering with violation records.
-3.  **V2X Communication**: Direct "Vehicle-to-Infrastructure" talk for autonomous vehicles.
-4.  **Real-World Pilot**: Planned deployment at 3 intersections in **[City Name]** to validate TCO savings.
+1.  **Map Server & Main Server Integration**: Tighter coupling of geospatial data with the central orchestrator to enable topology-aware rerouting during road closures.
+2.  **Real-World Parameterization**: Introducing variable speed models and heterogeneous driver behaviors (aggressive vs. compliant) to match the chaotic reality of Indian roads.
+3.  **Edge-Server Integration**: Hardening the handshake protocols between edge devices and the server to ensure 99.999% command delivery uptime even on 2G networks.
+4.  **Google-Backed GNN Research**: Transitioning from standard aggregation to **Graph Neural Networks (GNNs)**. This allows the system to model spatial dependencies of traffic flow more accurately, making it highly suitable for variable input data at the edge.
 
 ---
 
