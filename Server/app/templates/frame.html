@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vegha Traffic Simulation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="controls">
+        <button class="btn" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="btn" onclick="resetSim()">↻</button>
+        <button class="btn" id="speedBtn" onclick="speedUp()">1x</button>
+        <div class="mode-switch" onclick="toggleMode()">
+            <span class="mode-label left" id="modeVegha">VEGHA</span>
+            <div class="switch-track">
+                <div class="switch-thumb" id="modeThumb"></div>
+            </div>
+            <span class="mode-label right" id="modeFixed">FIXED</span>
+        </div>
+
+    </div>
+
+
+    <div class="street-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="margin:0;">🚧 Management</h3>
+            <button id="createEventBtn" onclick="toggleEventMode()"
+                style="background:#2196F3; border:none; color:white; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:12px;">📅
+                Create Event</button>
+        </div>
+
+        <!-- Event Creation Panel (Hidden by default) -->
+        <div id="eventCreationPanel"
+            style="display:none; background:rgba(33, 150, 243, 0.1); padding:10px; border-radius:8px; border:1px solid #2196F3; margin-bottom:15px;">
+            <h4 style="color:#2196F3; margin-top:0;">New Event</h4>
+            <input type="text" id="eventIdInput" placeholder="Event ID (e.g. E1)"
+                style="width:100%; margin-bottom:5px; padding:5px; border-radius:4px; border:none;">
+            <input type="text" id="eventTitleInput" placeholder="Event Title (e.g. Rally)"
+                style="width:100%; margin-bottom:10px; padding:5px; border-radius:4px; border:none;">
+
+            <p style="font-size:11px; margin-bottom:5px;">Selected Streets: <strong id="selectedCount">0</strong></p>
+            <p style="font-size:10px; opacity:0.7; margin-bottom:10px;">Click streets on map to select.</p>
+
+            <button onclick="confirmEvent()"
+                style="width:100%; background:#4CAF50; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer; font-weight:bold;">✅
+                Confirm Event</button>
+        </div>
+
+        <!-- Default Street Panel -->
+        <div id="defaultStreetPanel">
+            <div class="street-section">
+                <label>Search Street</label>
+                <input type="text" id="streetSearch" placeholder="Type to search streets..." onkeyup="filterStreets()">
+            </div>
+
+            <div class="street-section">
+                <label>Select Street / Edge</label>
+                <select id="streetSelect" size="8">
+                    <option value="">-- Start simulation to load streets --</option>
+                </select>
+                <div class="street-count" id="streetCount">0 streets available</div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn close" onclick="closeStreet()">🚫 Close Street</button>
+                <button class="action-btn open" onclick="openStreet()">✅ Open Street</button>
+            </div>
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+
+        <div class="closed-list">
+            <h4>🚫 Closed Streets (<span id="closedCount">0</span>)</h4>
+            <div id="closedStreetsList">
+                <p style="font-size: 12px; color: rgba(255,255,255,0.5);">No closed streets</p>
+            </div>
+        </div>
+
+        <!-- Active Events List -->
+        <div class="closed-list" style="margin-top:20px; border-top:1px solid #555;">
+            <h4>📅 Active Events</h4>
+            <div id="activeEventsList">
+                <p style="font-size: 12px; color: rgba(255,255,255,0.5);">No active events</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="metrics-bar">
+        <div class="metric">
+            <div class="metric-label">Vehicles</div>
+            <div class="metric-value" id="vehicle-count" style="color:#FFD700;">0</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Avg Speed</div>
+            <div class="metric-value" id="avg-speed" style="color:#4facfe;">0</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Waiting</div>
+            <div class="metric-value" id="waiting" style="color:#f5576c;">0</div>
+        </div>
+
+        <!-- ✅ NEW: Ambulance Metric -->
+        <div class="metric">
+            <div class="metric-label">Amb. Wait</div>
+            <div class="metric-value" id="amb-waiting" style="color:#ff4444; text-shadow: 0 0 5px red;">0</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Amb. Total</div>
+            <div class="metric-value" id="amb-count" style="color:#FFA500;">0</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Amb. Speed</div>
+            <div class="metric-value" id="amb-speed" style="color:#00FFFF;">0</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Time</div>
+            <div class="metric-value" id="sim-time" style="color:#38ef7d;">0s</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Signals</div>
+            <div class="metric-value" id="signals" style="color:#00ff00;">0</div>
+        </div>
+    </div>
+
+    <script>
+        var currentMode = "vegha"; // default
+
+        var map = L.map('map', {
+            zoomControl: true,
+            attributionControl: false,
+            minZoom: 15,
+            maxZoom: 18,
+            maxBoundsViscosity: 1.0
+        }).setView([19.04194, 73.02667], 16);
+
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var vehicles = {};
+        var trafficLights = {};
+        var blockedStreetLines = {};
+        var streetPolylines = {};  // Clickable street polylines
+        var socket = io();
+        var isPlaying = false;
+        var playSpeed = 1;
+        var allStreets = [];
+        var closedStreets = [];
+        var streetCoordinates = {};  // Store street coordinates
+
+        // ✅ Get icon size based on vehicle type
+        function getVehicleSize(type) {
+            if (type === 'bus') return { width: 50, height: 25 };
+            if (type === 'truck') return { width: 45, height: 22 };
+            if (type === 'motorcycle') return { width: 30, height: 15 };
+            if (type === 'ambulance') return { width: 42, height: 21 };
+            return { width: 40, height: 20 }; // Default passenger
+        }
+
+        // ✅ Load Real Vehicle Images instead of boxes
+        // ✅ Load Real Vehicle Images instead of boxes
+        function getVehicleSVG(type, angle) {
+            var imgSrc = '';
+            var size = getVehicleSize(type);
+
+            // Select image based on vehicle type
+            if (type === 'bus') {
+                imgSrc = 'images/bus.png';
+            } else if (type === 'truck') {
+                imgSrc = 'images/truck.png';
+            } else if (type === 'motorcycle') {
+                imgSrc = 'images/bike.png';
+            } else if (type === 'ambulance') {
+                imgSrc = 'images/ambulance.png';
+            } else {
+                // Default to passenger car
+                imgSrc = 'images/car.png';
+            }
+
+            // ✅ CHANGE THIS LINE ONLY:
+            // OLD: var cssAngle = angle - 90;
+            // NEW:
+            var cssAngle = angle;  // ← REMOVE the "- 90" offset
+
+            return `
+                <svg width="${size.width}" height="${size.height}"
+                    viewBox="0 0 ${size.width} ${size.height}"
+                    style="transform: rotate(${cssAngle}deg); transform-origin: center center; overflow: visible; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                    <image href="${imgSrc}" x="0" y="0" width="${size.width}" height="${size.height}"
+                        onerror="console.error('Failed to load: ${imgSrc}')" />
+                </svg>
+            `;
+        }
+
+
+        console.log('🚗 Vehicle images initialized');
+
+        // ✅ Draw clickable streets on the map
+        function drawClickableStreets(streetsData) {
+            // Clear existing street polylines
+            for (var id in streetPolylines) {
+                map.removeLayer(streetPolylines[id]);
+            }
+            streetPolylines = {};
+
+            // Draw each street as a clickable polyline
+            streetsData.forEach(function (streetData) {
+                if (!streetData.coordinates || streetData.coordinates.length < 2) return;
+
+                var streetId = streetData.name;
+                streetCoordinates[streetId] = streetData.coordinates;
+
+                // Don't draw if already blocked (will be shown in red)
+                if (closedStreets.includes(streetId)) return;
+
+                var polyline = L.polyline(streetData.coordinates, {
+                    color: '#4A90E2',
+                    weight: 4,
+                    opacity: 0.6,
+                    lineCap: 'round',
+                    lineJoin: 'round',
+                    className: 'clickable-street'
+                }).addTo(map);
+
+                // Store reference
+                streetPolylines[streetId] = polyline;
+
+                // Re-add hover and click handlers
+                polyline.on('mouseover', function (e) {
+                    // 1. If currently selected for new event -> HIGH ORANGE
+                    if (selectedEventStreets.has(streetId)) {
+                        this.setStyle({ color: tempEventColor, opacity: 1.0, weight: 8 });
+                        return;
+                    }
+
+                    // 2. If part of an ACTIVE EVENT -> Keep event color, just bump weight/opacity slightly
+                    // We can check if the current color is NOT the default blue
+                    var currentColor = this.options.color; // Leaflet stores current options
+                    if (currentColor !== '#4A90E2') {
+                        // It's likely an event color. Keep it, just highlight a bit.
+                        this.setStyle({ opacity: 1.0, weight: 7 });
+                        return;
+                    }
+
+                    // 3. Normal Street -> Highlight
+                    if (!closedStreets.includes(streetId)) {
+                        this.setStyle({ opacity: 0.7, weight: 6 });
+                    }
+                });
+
+                polyline.on('mouseout', function (e) {
+                    // 1. If currently selected -> Return to SELECTION style
+                    if (selectedEventStreets.has(streetId)) {
+                        this.setStyle({ color: tempEventColor, opacity: 1.0, weight: 8 });
+                        return;
+                    }
+
+                    // 2. If part of an ACTIVE EVENT -> Return to EVENT style
+                    var owningEvent = activeEventsCache.find(evt => evt.streets.some(s => idsMatch(s, streetId)));
+
+                    if (owningEvent) {
+                        this.setStyle({ color: owningEvent.color, opacity: 0.9, weight: 6 });
+                        return;
+                    }
+
+                    // 3. Normal Street -> Return to DEFAULT style (0.6 opacity)
+                    if (!closedStreets.includes(streetId)) {
+                        this.setStyle({ color: '#4A90E2', opacity: 0.6, weight: 4 });
+                    }
+                });
+
+                // Add click handler to block/unblock street or toggle event
+                polyline.on('click', function (e) {
+                    L.DomEvent.stopPropagation(e);
+
+                    if (isEventMode) {
+                        toggleStreetSelection(streetId);
+                        return;
+                    }
+
+                    // Normal Mode: Show Popup Manually
+                    var popupContent = '<div style="text-align: center;">' +
+                        '<strong>🛣️ ' + streetId + '</strong><br>' +
+                        '<button onclick="socket.emit(\'close_street\', {street: \'' + streetId + '\'}); return false;" ' +
+                        'style="margin: 5px; padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">' +
+                        '🚫 Block</button>' +
+                        '</div>';
+
+                    L.popup()
+                        .setLatLng(e.latlng)
+                        .setContent(popupContent)
+                        .openOn(map);
+
+                    // Set dropdown
+                    document.getElementById('streetSelect').value = streetId;
+                    console.log('📍 Selected street in dropdown:', streetId);
+                });
+
+                // NO bindPopup here - we handle it manually above!
+            });
+
+            console.log('✅ Drew', Object.keys(streetPolylines).length, 'clickable streets');
+        }
+
+        // Helper to match IDs (ignores leading +)
+        function idsMatch(id1, id2) {
+            if (!id1 || !id2) return false;
+            var n1 = id1.toString().replace(/^\+/, '');
+            var n2 = id2.toString().replace(/^\+/, '');
+            return n1 === n2;
+        }
+        function toggleMode() {
+            var newMode = currentMode === "vegha" ? "fixed" : "vegha";
+
+            fetch('/api/mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: newMode })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Mode switch failed");
+                    return res.json();
+                })
+                .then(data => {
+                    currentMode = newMode;
+                    updateModeButton();
+                    showStatus('success', data.message);
+                })
+                .catch(err => {
+                    console.error(err);
+                    showStatus('error', 'Failed to change mode');
+                });
+        }
+        function updateModeButton() {
+            var container = document.querySelector('.mode-switch');
+
+            container.classList.remove('mode-vegha', 'mode-fixed');
+
+            if (currentMode === "vegha") {
+                container.classList.add('mode-vegha');
+            } else {
+                container.classList.add('mode-fixed');
+            }
+        }
+
+
+        fetch('/api/mode')
+            .then(res => res.json())
+            .then(data => {
+                if (data.mode) {
+                    currentMode = data.mode;
+                    updateModeButton();
+                }
+            })
+            .catch(err => console.error('Failed to fetch mode:', err));
+        socket.on('update', function (data) {
+            // --- 1. Update Statistics ---
+            document.getElementById('vehicle-count').textContent = Object.keys(data.vehicles || {}).length;
+            document.getElementById('avg-speed').textContent = data.avg_speed + ' km/h';
+            document.getElementById('waiting').textContent = data.waiting;
+
+            // ✅ NEW: Update Ambulance Waiting Stat here
+            // (Make sure you added the <div id="amb-waiting"> in the HTML as shown before)
+            document.getElementById('amb-waiting').textContent = data.amb_waiting || 0;
+            document.getElementById('amb-count').textContent = data.amb_count || 0;
+            document.getElementById('sim-time').textContent = data.time + 's';
+            document.getElementById('signals').textContent = Object.keys(data.traffic_lights || {}).length;
+            document.getElementById('amb-speed').textContent = (data.amb_avg_speed || 0) + ' km/h';
+            // --- 2. Update Vehicles ---
+            for (var id in data.vehicles) {
+                var veh = data.vehicles[id];
+                var lon = veh.pos[0];
+                var lat = veh.pos[1];
+                var angle = veh.angle || 0;
+                var type = veh.type;
+
+                var size = getVehicleSize(type);
+                var icon = L.divIcon({
+                    html: getVehicleSVG(type, angle),
+                    className: 'vehicle-icon',
+                    iconSize: [size.width, size.height],
+                    iconAnchor: [size.width / 2, size.height / 2]
+                });
+
+                if (!vehicles[id]) {
+                    vehicles[id] = L.marker([lat, lon], { icon: icon }).addTo(map);
+                } else {
+                    vehicles[id].setIcon(icon);
+                    vehicles[id].setLatLng([lat, lon]);
+                }
+            }
+
+            // --- 3. Remove Missing Vehicles ---
+            for (var id in vehicles) {
+                if (!data.vehicles[id]) {
+                    map.removeLayer(vehicles[id]);
+                    delete vehicles[id];
+                }
+            }
+
+            // --- 4. Update Traffic Lights ---
+            for (var tlId in data.traffic_lights) {
+                var tl = data.traffic_lights[tlId];
+                if (!tl.pos || tl.pos.length !== 2) return;
+
+                var lon = tl.pos[0];
+                var lat = tl.pos[1];
+
+                var state = tl.state;
+                var angle = tl.angle || 0;
+
+                var color = state === 'green' ? '#00ff00' : (state === 'yellow' ? '#ffff00' : '#ff0000');
+
+                if (!trafficLights[tlId]) {
+                    var icon = L.divIcon({
+                        html: `<div class="traffic-light-line" style="background: ${color}; color: ${color}; transform: rotate(${angle}deg);"></div>`,
+                        className: '',
+                        iconSize: [30, 4],
+                        iconAnchor: [15, 2]
+                    });
+                    trafficLights[tlId] = L.marker([lat, lon], { icon: icon, zIndexOffset: 1000 }).addTo(map);
+                    trafficLights[tlId].bindPopup(`🚦 Signal ID: <b>${tlId}</b>`);
+                } else {
+                    var icon = L.divIcon({
+                        html: `<div class="traffic-light-line" style="background: ${color}; color: ${color}; transform: rotate(${angle}deg);"></div>`,
+                        className: '',
+                        iconSize: [30, 4],
+                        iconAnchor: [15, 2]
+                    });
+                    trafficLights[tlId].setIcon(icon);
+                }
+            }
+        });
+
+
+        socket.on('streets_loaded', function (data) {
+            console.log('Streets loaded:', data.total);
+
+            var allCoords = []; // Store all points to find the center
+
+            // Check if data includes coordinates
+            if (data.streets_with_coords && data.streets_with_coords.length > 0) {
+                allStreets = data.streets_with_coords.map(function (s) { return s.name; });
+                drawClickableStreets(data.streets_with_coords);
+
+                // Collect all coordinates
+                data.streets_with_coords.forEach(function (street) {
+                    street.coordinates.forEach(function (coord) {
+                        allCoords.push(coord);
+                    });
+                });
+            } else {
+                allStreets = data.streets || [];
+            }
+
+            populateStreetSelect();
+
+            // ✅ AUTO-CENTER LOGIC
+            if (allCoords.length > 0) {
+                var bounds = L.latLngBounds(allCoords);
+                map.fitBounds(bounds); // Zooms and pans to fit the Berlin map
+                console.log("🌍 Map auto-centered to simulation bounds");
+            }
+        });
+
+        socket.on('street_status', function (data) {
+            if (data.success) {
+                showStatus('success', data.message);
+                closedStreets = data.closed_streets || [];
+                updateClosedStreetsList();
+
+                if (data.action === 'closed' && data.edge_coords) {
+                    var streetId = data.street;
+
+                    // Remove clickable street polyline (will be replaced with red blocked line)
+                    if (streetPolylines[streetId]) {
+                        map.removeLayer(streetPolylines[streetId]);
+                        delete streetPolylines[streetId];
+                    }
+
+                    if (blockedStreetLines[streetId]) {
+                        map.removeLayer(blockedStreetLines[streetId]);
+                    }
+
+                    blockedStreetLines[streetId] = L.polyline(data.edge_coords, {
+                        color: '#FF0000',
+                        weight: 4,
+                        opacity: 1.0,
+                        lineCap: 'butt',
+                        lineJoin: 'miter',
+                        dashArray: '15, 10',
+                        zIndexOffset: 5000
+                    }).addTo(map);
+
+                    blockedStreetLines[streetId].bringToFront();
+
+                    // Add click handler to unblock
+                    blockedStreetLines[streetId].on('click', function (e) {
+                        L.DomEvent.stopPropagation(e);
+                        if (confirm('Reopen street: ' + streetId + '?')) {
+                            socket.emit('open_street', { street: streetId });
+                        }
+                    });
+
+                    blockedStreetLines[streetId].bindPopup(
+                        '<div style="color: red; font-weight: bold; text-align: center;">🚫 BLOCKED<br>' + streetId + '<br>' +
+                        '<button onclick="socket.emit(\'open_street\', {street: \'' + streetId + '\'}); return false;" ' +
+                        'style="margin: 5px; padding: 5px 10px; background: #44ff44; color: black; border: none; border-radius: 4px; cursor: pointer;">' +
+                        '✅ Reopen</button></div>'
+                    );
+
+                    console.log('✅ Drew RED lane:', streetId);
+                }
+
+                if (data.action === 'opened') {
+                    var streetId = data.street;
+                    if (blockedStreetLines[streetId]) {
+                        map.removeLayer(blockedStreetLines[streetId]);
+                        delete blockedStreetLines[streetId];
+                        console.log('✅ Removed blocked lane:', streetId);
+                    }
+
+                    // Restore clickable street polyline
+                    if (streetCoordinates[streetId]) {
+                        var polyline = L.polyline(streetCoordinates[streetId], {
+                            color: '#4A90E2',
+                            weight: 4,
+                            opacity: 0.6,
+                            lineCap: 'round',
+                            lineJoin: 'round'
+                        }).addTo(map);
+
+                        streetPolylines[streetId] = polyline;
+
+                        // Re-add hover and click handlers
+                        polyline.on('mouseover', function (e) {
+                            this.setStyle({ opacity: 0.7, weight: 6 });
+                        });
+
+                        polyline.on('mouseout', function (e) {
+                            this.setStyle({ opacity: 0.6, weight: 4 });
+                        });
+
+                        polyline.on('click', function (e) {
+                            L.DomEvent.stopPropagation(e);
+                            if (confirm('Block street: ' + streetId + '?')) {
+                                socket.emit('close_street', { street: streetId });
+                            }
+                        });
+
+                        polyline.bindPopup(
+                            '<div style="text-align: center;">' +
+                            '<strong>🛣️ ' + streetId + '</strong><br>' +
+                            '<button onclick="socket.emit(\'close_street\', {street: \'' + streetId + '\'}); return false;" ' +
+                            'style="margin: 5px; padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">' +
+                            '🚫 Block</button>' +
+                            '</div>'
+                        );
+                    }
+                }
+            } else {
+                showStatus('error', data.error);
+            }
+        });
+
+        function populateStreetSelect() {
+            var select = document.getElementById('streetSelect');
+            select.innerHTML = '';
+
+            allStreets.forEach(function (street) {
+                var option = document.createElement('option');
+                option.value = street;
+                option.textContent = street;
+                select.appendChild(option);
+            });
+
+            document.getElementById('streetCount').textContent = allStreets.length + ' streets available';
+        }
+
+        function filterStreets() {
+            var search = document.getElementById('streetSearch').value.toLowerCase();
+            var select = document.getElementById('streetSelect');
+            select.innerHTML = '';
+
+            var filtered = allStreets.filter(function (street) {
+                return street.toLowerCase().includes(search);
+            });
+
+            filtered.forEach(function (street) {
+                var option = document.createElement('option');
+                option.value = street;
+                option.textContent = street;
+                select.appendChild(option);
+            });
+
+            document.getElementById('streetCount').textContent = filtered.length + ' streets shown';
+        }
+
+        function closeStreet() {
+            var select = document.getElementById('streetSelect');
+            var street = select.value;
+
+            if (!street) {
+                showStatus('error', 'Please select a street first');
+                return;
+            }
+
+            socket.emit('close_street', { street: street });
+        }
+
+        function openStreet() {
+            var select = document.getElementById('streetSelect');
+            var street = select.value;
+
+            if (!street) {
+                showStatus('error', 'Please select a street first');
+                return;
+            }
+
+            socket.emit('open_street', { street: street });
+        }
+
+        function updateClosedStreetsList() {
+            var list = document.getElementById('closedStreetsList');
+            document.getElementById('closedCount').textContent = closedStreets.length;
+
+            if (closedStreets.length === 0) {
+                list.innerHTML = '<p style="font-size: 12px; color: rgba(255,255,255,0.5);">No closed streets</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            closedStreets.forEach(function (street) {
+                var item = document.createElement('div');
+                item.className = 'closed-item';
+                item.innerHTML = `
+                    <span>${street}</span>
+                    <button onclick="openClosedStreet('${street}')">Open</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function openClosedStreet(street) {
+            socket.emit('open_street', { street: street });
+        }
+
+        function showStatus(type, message) {
+            var statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = 'status-message ' + type;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+
+            setTimeout(function () {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            var btn = document.getElementById('playBtn');
+
+            if (isPlaying) {
+                btn.textContent = '⏸';
+                btn.classList.add('active');
+                socket.emit('start');
+            } else {
+                btn.textContent = '▶';
+                btn.classList.remove('active');
+                socket.emit('pause');
+            }
+        }
+
+        function resetSim() {
+            socket.emit('reset');
+            for (var id in vehicles) map.removeLayer(vehicles[id]);
+            for (var id in trafficLights) map.removeLayer(trafficLights[id]);
+            for (var id in blockedStreetLines) map.removeLayer(blockedStreetLines[id]);
+            for (var id in streetPolylines) map.removeLayer(streetPolylines[id]);
+
+            vehicles = {};
+            trafficLights = {};
+            blockedStreetLines = {};
+            streetPolylines = {};
+            isPlaying = false;
+            closedStreets = [];
+            updateClosedStreetsList();
+            document.getElementById('playBtn').textContent = '▶';
+            document.getElementById('playBtn').classList.remove('active');
+        }
+
+        // --- Event Mode Logic ---
+        var isEventMode = false;
+        var selectedEventStreets = new Set();
+        var tempEventColor = '#FFA500'; // Orange for selection
+
+        // Toggle Event Creation Mode
+        function toggleEventMode() {
+            isEventMode = !isEventMode;
+            var btn = document.getElementById('createEventBtn');
+            var panel = document.getElementById('eventCreationPanel');
+            var defaultPanel = document.getElementById('defaultStreetPanel');
+
+            if (isEventMode) {
+                // Determine visual state
+                btn.classList.add('active');
+                btn.textContent = '❌ Cancel Event';
+                panel.style.display = 'block';
+                defaultPanel.style.display = 'none';
+
+                // Clear previous selection
+                selectedEventStreets.clear();
+                document.getElementById('selectedCount').textContent = '0';
+
+                showStatus('success', 'Select streets on map, then confirm.');
+
+                // DISABLE POPUPS
+                for (var id in streetPolylines) {
+                    streetPolylines[id].unbindPopup();
+                }
+
+                // Refresh visuals to show existing events + selection
+                refreshMapVisuals();
+
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '📅 Create Event';
+                panel.style.display = 'none';
+                defaultPanel.style.display = 'block';
+
+                // Reset selection visuals
+                selectedEventStreets.clear();
+                // updateSelectionVisuals(); // No longer needed, refreshMapVisuals does it
+
+                // Refresh visuals to return to normal
+                refreshMapVisuals();
+
+                // RE-ENABLE POPUPS
+                for (var id in streetPolylines) {
+                    var p = streetPolylines[id];
+                    if (p._popupContent) {
+                        p.bindPopup(p._popupContent);
+                    }
+                }
+            }
+        }
+
+        // --- Color Management ---
+        var eventColors = [
+            '#D32F2F', // Red 700
+            '#C2185B', // Pink 700
+            '#7B1FA2', // Purple 700
+            '#512DA8', // Deep Purple 700
+            '#303F9F', // Indigo 700
+            '#1976D2', // Blue 700
+            '#00796B', // Teal 700
+            '#388E3C', // Green 700
+            '#F57C00', // Orange 700
+            '#E64A19', // Deep Orange 700
+            '#5D4037', // Brown 700
+            '#455A64'  // Blue Grey 700
+        ];
+
+        function getEventColor(id) {
+            // Simple hash of string ID
+            var hash = 0;
+            var str = id.toString();
+            for (var i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            // Positive mod
+            var index = Math.abs(hash) % eventColors.length;
+            return eventColors[index];
+        }
+
+        // --- Unified Map Visuals Logic ---
+        var activeEventsCache = [];
+
+        function refreshMapVisuals() {
+            var normalizeId = (id) => id.replace(/^\+/, '');
+
+            // 1. Reset all to default Base style
+            for (var id in streetPolylines) {
+                var poly = streetPolylines[id];
+                var normId = normalizeId(id);
+
+                // Check if this map ID matches any ID in the closed list (normalized check)
+                var isClosed = closedStreets.some(c => normalizeId(c) === normId);
+
+                if (!isClosed) {
+                    // Default Blue (Opacity 0.6)
+                    poly.setStyle({ color: '#4A90E2', opacity: 0.6, weight: 4 });
+                } else {
+                    // Default Closed (Dark Grey) - will be overridden by Event Styles if applicable
+                    poly.setStyle({ color: '#555555', opacity: 0.7, weight: 4 });
+                }
+            }
+
+            // 2. Apply Event Styles (Dark/Distinct)
+            activeEventsCache.forEach(function (evt) {
+                evt.streets.forEach(streetId => {
+                    // Try exact match first, then normalized
+                    var poly = streetPolylines[streetId] || streetPolylines[streetId.replace(/^\+/, '')];
+
+                    if (poly) {
+                        // Apply event color
+                        poly.setStyle({ color: evt.color, opacity: 0.9, weight: 6 });
+                    }
+                });
+            });
+
+            // 3. Apply Current Selection (Override everything if creating event)
+            if (isEventMode) {
+                selectedEventStreets.forEach(function (streetId) {
+                    if (streetPolylines[streetId]) {
+                        streetPolylines[streetId].setStyle({ color: tempEventColor, opacity: 1.0, weight: 8 });
+                    }
+                });
+            }
+        }
+
+        // Toggle street selection for event
+        function toggleStreetSelection(streetId) {
+            if (selectedEventStreets.has(streetId)) {
+                selectedEventStreets.delete(streetId);
+            } else {
+                selectedEventStreets.add(streetId);
+            }
+            document.getElementById('selectedCount').textContent = selectedEventStreets.size;
+            refreshMapVisuals();
+        }
+
+        // Confirm and Create Event
+        function confirmEvent() {
+            var id = document.getElementById('eventIdInput').value.trim();
+            var title = document.getElementById('eventTitleInput').value.trim();
+
+            if (!title) {
+                alert("Please enter Event Title");
+                return;
+            }
+            if (selectedEventStreets.size === 0) {
+                alert("Please select at least one street.");
+                return;
+            }
+
+            var payload = {
+                id: id, // Can be empty
+                title: title,
+                streets: Array.from(selectedEventStreets)
+            };
+
+            fetch('/api/events/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        showStatus('success', 'Event Created!');
+                        toggleEventMode(); // Exit mode
+                        // Clear inputs
+                        document.getElementById('eventIdInput').value = '';
+                        document.getElementById('eventTitleInput').value = '';
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+
+        // Render Active Events
+        function renderEventsList(events) {
+
+            // Update Cache & Assign Colors
+            activeEventsCache = events.map(evt => {
+                evt.color = getEventColor(evt.id);
+                return evt;
+            });
+
+            // Refresh Map
+            refreshMapVisuals();
+
+            // Render Sidebar
+            var container = document.getElementById('activeEventsList');
+            container.innerHTML = '';
+
+            if (events.length === 0) {
+                container.innerHTML = '<p style="font-size: 12px; opacity:0.5;">No active events.</p>';
+                return;
+            }
+
+            activeEventsCache.forEach(function (evt) {
+                var div = document.createElement('div');
+                div.className = 'event-item';
+                div.style.borderLeft = `4px solid ${evt.color}`;
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>${evt.title} (${evt.id})</strong>
+                        <div style="display:flex; gap:5px; align-items:center;">
+                            <!-- Removed redundant 'Active' badge -->
+                            <button onclick="removeEvent('${evt.id}')" 
+                                style="background:#ff4444; color:white; border:none; border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer;" 
+                                title="End Event">
+                                End Event
+                            </button>
+                        </div>
+                    </div>
+                    <div style="font-size:11px; margin-top:4px; opacity:0.8; word-break:break-all;">
+                        ${evt.streets.length} streets: ${evt.streets.join(', ')}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removeEvent(id) {
+            if (!confirm("Are you sure you want to END this event? Streets will be reopened.")) return;
+
+            fetch('/api/events/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        showStatus('success', 'Event Removed');
+                        // fetchEvents will be triggered by socket 'event_removed'
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+
+        // --- Socket Listeners ---
+        socket.on('event_created', function (evt) {
+            fetchEvents();
+        });
+
+        socket.on('event_removed', function (data) {
+            console.log('🗑️ Event Removed:', data.id);
+            fetchEvents();
+        });
+
+        function fetchEvents() {
+            fetch('/api/events')
+                .then(res => res.json())
+                .then(data => {
+                    renderEventsList(data.events);
+                });
+        }
+
+        // Modify init to fetch events
+        fetchEvents();
+
+        function speedUp() {
+            playSpeed = playSpeed >= 3 ? 0.5 : playSpeed + 0.5;
+            socket.emit('speed', { speed: playSpeed });
+            document.getElementById('speedBtn').textContent = playSpeed + 'x';
+        }
+    </script>
+</body>
+
+</html>
