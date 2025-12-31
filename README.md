@@ -31,6 +31,10 @@ Urban traffic in the Global South is chaotic, unstructured, and rapidly expandin
 *This video showcases a side‑by‑side comparison between the existing traffic control approach and our Vegha‑powered model on the same road network and conditions. You’ll see how our system reduces congestion, lowers waiting time, and prioritizes ambulances and emergency vehicles more efficiently than the current setup. The demo highlights key metrics like vehicle throughput, average speed, and signal responsiveness to clearly show performance gains. Watch to understand how intelligent, data‑driven traffic management can transform everyday commuting and emergency response in urban areas.*
 [![Comparison](https://img.youtube.com/vi/Dss-J9jrGe0/0.jpg)](https://youtu.be/Dss-J9jrGe0)
 
+### 3. Edge Computing: Real-World Device Demo
+*This video demonstrates how edge computing powers Vegha’s intelligent traffic control in a real-world setup using a low-cost device equivalent in cost to our deployed roadside hardware. You’ll see how critical decisions like signal timing, congestion detection, and ambulance prioritization are processed directly at the edge instead of relying on the cloud. The demo highlights reduced latency, higher reliability during network issues, and continuous operation even with limited connectivity. Watch how an affordable on-device deployment can still deliver high-performance, real-time traffic management for smart cities.*
+[![Edge Computing](https://img.youtube.com/vi/-pVcdBaw4GY/0.jpg)](https://youtube.com/shorts/-pVcdBaw4GY)
+
 ---
 
 ## 💻 Deployment & Running Instructions
