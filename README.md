@@ -201,6 +201,7 @@ We have a clear roadmap to move from prototype to pilot, focusing on high-fideli
 2.  **Real-World Parameterization**: Introducing variable speed models and heterogeneous driver behaviors (aggressive vs. compliant) to match the chaotic reality of Indian roads.
 3.  **Edge-Server Integration**: Hardening the handshake protocols between edge devices and the server to ensure 99.999% command delivery uptime even on 2G networks.
 4.  **Google-Backed GNN Research**: Transitioning from standard aggregation to **Graph Neural Networks (GNNs)**. This allows the system to model spatial dependencies of traffic flow more accurately, making it highly suitable for variable input data at the edge.
+5.  **Challan Dashboard**: Developing a centralized dashboard to monitor and analyze traffic challans. This facilitates identification of high-violation zones, automation of reporting, and integration with predictive traffic management systems for smarter enforcement and policy planning. 
 
 ---
 
