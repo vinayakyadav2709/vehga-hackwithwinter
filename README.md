@@ -122,6 +122,40 @@ This video showcases a side‑by‑side comparison between the existing traffic 
 
 ---
 
+## 📐 Detailed Design Diagrams
+
+We have documented the system extensively with detailed diagrams covering architecture, data flows, and logic.
+
+### 1. System Architecture
+**High-Level Architecture**: The big picture view of how Vegha's components interact.
+![High-Level System Architecture](resources/Diagrams/High-Level%20System%20Architecture%20Diagram.png)
+
+**Deployment Architecture**: How the system is deployed across edge devices and the cloud.
+![Deployment Architecture](resources/Diagrams/Deployment%20Architecture%20Diagram.png)
+
+### 2. Data Flow
+**Context Diagram (Level 0)**: The system's boundaries and external entities.
+![DFD Level 0](resources/Diagrams/Data%20Flow%20Diagram%20(DFD)%20Level%200:%20Context%20Diagram.png)
+
+**Traffic Control Logic (Level 1)**: detailed flow of data within the traffic control subsystem.
+![DFD Level 1](resources/Diagrams/Data%20Flow%20Diagram%20(DFD)%20Level%201:%20Traffic%20Control%20Logic.png)
+
+### 3. Data Schemas
+**Application Data Schema**: Structure of the data used in the application layer.
+![Application Data Schema](resources/Diagrams/Application%20Data%20Schema%20Diagram.png)
+
+**Simulation Data Schema**: Structure of the data generated and used by the SUMO simulation.
+![Simulation Data Schema](resources/Diagrams/Simulation%20Data%20Schema.png)
+
+### 4. Operational Logic & Sequences
+**RL State Transition**: The states and transitions of the Reinforcement Learning agent controlling the traffic lights.
+![RL State Transition](resources/Diagrams/Traffic%20Light%20State%20Transition%20Diagram%20(RL%20Control).png)
+
+**Emergency Vehicle Sequence**: The sequence of events when an emergency vehicle is detected (Green Wave).
+![Emergency Green Wave](resources/Diagrams/Sequence%20Diagram:%20Emergency%20Vehicle%20"Green%20Wave".png)
+
+---
+
 ## 📉 Why Existing Systems Fail
 
 | Feature | Traditional ATCS | Vegha (Our Solution) |
