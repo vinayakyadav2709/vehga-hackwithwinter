@@ -180,29 +180,7 @@ We have rigorously documented every facet of the system's architecture. The foll
 **High-Level Architecture**: The big picture view of how Vegha's components interact.
 ![High-Level System Architecture](resources/Diagrams/High-Level%20System%20Architecture%20Diagram.png)
 
-```mermaid
-graph TD
-    subgraph Edge_Layer ["Edge Layer (The 'Brain')"]
-        EdgeNodes[("🚗 Edge Nodes\n(Raspberry Pi / Jetson)")]
-        LocalAI["YOLO Vision Model"]
-        TrafficSignal["Traffic Signal Controller"]
-        
-        EdgeNodes -->|Video Feed| LocalAI
-        LocalAI -->|Vehicle Counts| EdgeNodes
-        EdgeNodes -->|Signal Control| TrafficSignal
-    end
-    subgraph Cloud_Layer ["Cloud Layer (The 'Orchestrator')"]
-        LB["Load Balancer"]
-        API["Backend API\n(Python/Flask)"]
-        SUMO["SUMO Simulation Engine\n(Digital Twin)"]
-        DB[(PostgreSQL/TimescaleDB)]
-        
-        EdgeNodes -->|Telemetry (MQTT/WS)| LB
-        LB --> API
-        API --> SUMO
-        API --> DB
-    end
-```
+
 
 **Deployment Architecture**: How the system is deployed across edge devices and the cloud.
 ![Deployment Architecture](resources/Diagrams/Deployment%20Architecture%20Diagram.png)
@@ -218,26 +196,7 @@ graph TD
 **Application Data Schema**: Structure of the data used in the application layer.
 ![Application Data Schema](resources/Diagrams/Application%20Data%20Schema%20Diagram.png)
 
-```mermaid
-erDiagram
-    INTERSECTION ||--|{ LANE : contains
-    INTERSECTION ||--|{ DEVICE : has
-    DEVICE ||--|{ LOG : generates
-    INTERSECTION {
-        string id PK
-        float lat
-        float long
-    }
-    DEVICE {
-        string id PK
-        string status
-    }
-    LOG {
-        int id PK
-        timestamp time
-        int count
-    }
-```
+
 
 **Simulation Data Schema**: Structure of the data generated and used by the SUMO simulation.
 ![Simulation Data Schema](resources/Diagrams/Simulation%20Data%20Schema.png)
