@@ -87,6 +87,8 @@ We operated like a high-performance startup team, using industry-standard checks
 | **System Analyst** | **Design & Documentation** | Created the comprehensive DFDs, Database Schemas, and ensured the architecture meets security and scalability standards. |
 
 > **Development Workflow**: We strictly followed **Git Flow**. No direct pushes to `main`. All code went through feature branches (e.g., `feature/yolo-integration`, `feature/dashboard-ui`) and Pull Request reviews.
+>
+> **Note on Commit Frequency**: Due to the heavy R&D nature of this project (AI/ML model training, Edge environment configuration, and Simulation parameter tuning), the raw number of commits or lines of code may not fully reflect the equal and significant effort contributed by every team member. Much of the work involved off-repo research, model experimentation, and hardware setup which is architecturally critical but code-light.
 
 ---
 
