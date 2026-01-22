@@ -12,7 +12,10 @@ class TrafficSignalScorer(nn.Module):
     Takes ONE candidate edge + GLOBAL context, outputs scalar Q-value.
     """
 
-    def __init__(self, input_dim=12):
+    def __init__(self, input_dim=18):  # Updated from 12 to 18
+        # Candidate: [queue, wait, speed, vol, occ, emg_count, emg_wait, has_emg, tslg, is_green] = 10
+        # Context: [queue, wait, speed, vol, occ, emg_count, emg_wait, has_emg] = 8
+        # Total: 18
         super(TrafficSignalScorer, self).__init__()
         self.network = nn.Sequential(
             nn.Linear(input_dim, 256),

@@ -1,6 +1,9 @@
 import traci
 import utils
 from models import DQN_Agent
+from decision_logger import decision_logger
+import torch
+import random
 
 
 class JunctionAgent:
@@ -165,31 +168,106 @@ class JunctionAgent:
 
         # 4. Select Action
         action_idx = self.brain.predict(candidate_feats, context_feats, explore=train)
+        
+        # Track decision reason (don't call random() again - predict() already did exploration)
+        decision_reason = 'q_value'  # Default
+        if train and hasattr(self.brain, 'epsilon') and self.brain.epsilon > 0.5:
+            # High exploration phase - likely was exploration
+            decision_reason = 'exploration'
+        
+        decision_data = {}
+        
+        # Get Q-values for all candidates (for explanation) - with error handling
+        q_values = []
+        try:
+            if hasattr(self.brain, 'model') and self.brain.model is not None:
+                self.brain.model.eval()
+                context_tensor = torch.FloatTensor(context_feats).unsqueeze(0).to(self.brain.device)
+                with torch.no_grad():
+                    for feats in candidate_feats:
+                        cand_tensor = torch.FloatTensor(feats).unsqueeze(0).to(self.brain.device)
+                        score = self.brain.model(cand_tensor, context_tensor)
+                        q_values.append(score.item())
+        except Exception:
+            # Model might not be fully initialized yet - silent fail
+            q_values = []
+        
+        # Check for emergency vehicles on each edge
+        emergency_edges = []
+        edge_emergency_counts = {}
+        for i, edge in enumerate(self.unique_edges):
+            lanes = self.edge_lane_map[edge]
+            emg_count, emg_wait, has_emg = utils.get_emergency_features(lanes)
+            edge_emergency_counts[edge] = emg_count
+            if has_emg:
+                emergency_edges.append(edge)
+        
+        decision_data['emergency_edges'] = emergency_edges
+        decision_data['has_emergency'] = len(emergency_edges) > 0
+        decision_data['edge_emergency_counts'] = edge_emergency_counts
 
         # SAFETY: FORCE SWITCH if stuck too long (Max Red Starvation)
         MAX_RED_TIME = 120.0
+        exceeded_red_edge = None
         for i, edge in enumerate(self.unique_edges):
             if current_sim_time - self.last_green_times[edge] > MAX_RED_TIME:
-                 if i != self.current_edge_idx: # Only force if it's not currently green (which would be weird if red time is high)
+                 if i != self.current_edge_idx:
                      action_idx = i
+                     exceeded_red_edge = edge
+                     decision_reason = 'max_red_safety'
                      if self.step_counter % 100 == 0:
                          print(f"[{self.tls_id}] MAX RED EXCEEDED on {edge}. Forcing switch.")
                      break
+        
+        if exceeded_red_edge:
+            decision_data['exceeded_edge'] = exceeded_red_edge
 
         # FORCE SWITCH if stuck too long (Max Green Safety)
         MAX_GREEN_TIME = 100.0
         time_current_green = current_sim_time - self.last_switch_time
         if time_current_green > MAX_GREEN_TIME and action_idx == self.current_edge_idx:
+            old_idx = action_idx
             action_idx = (self.current_edge_idx + 1) % len(self.unique_edges)
+            decision_reason = 'max_green_safety'
+            decision_data['previous_edge'] = self.unique_edges[old_idx]
             print(f"[{self.tls_id}] MAX GREEN EXCEEDED. Forcing switch to {self.unique_edges[action_idx]}")
 
         # 5. Update Observation
         self.last_observation = (candidate_feats, context_feats, action_idx)
 
-        # 6. Execute Action
+        # 6. Execute Action and Log Decision
         self.last_action_caused_switch = False
         if action_idx != self.current_edge_idx:
-            # Switch needed
+            # Switch needed - LOG THIS DECISION
+            chosen_edge = self.unique_edges[action_idx]
+            alternatives = [e for i, e in enumerate(self.unique_edges) if i != action_idx]
+            
+            # Add Q-value info to decision data
+            if q_values:
+                decision_data['q_values'] = q_values
+                decision_data['q_value'] = q_values[action_idx]
+                decision_data['chosen_q_value'] = q_values[action_idx]
+            
+            # Add feature info for chosen edge
+            decision_data['chosen_features'] = {
+                'queue': candidate_feats[action_idx][0],
+                'wait': candidate_feats[action_idx][1],
+                'speed': candidate_feats[action_idx][2],
+                'emergency_count': candidate_feats[action_idx][5] if len(candidate_feats[action_idx]) > 5 else 0,
+                'emergency_wait': candidate_feats[action_idx][6] if len(candidate_feats[action_idx]) > 6 else 0,
+            }
+            
+            # Log the decision
+            decision_logger.log_decision(
+                junction_id=self.tls_id,
+                sim_time=current_sim_time,
+                chosen_edge=chosen_edge,
+                alternatives=alternatives,
+                reason=decision_reason,
+                decision_data=decision_data
+            )
+            
+            # Execute the switch
             yellow_state = self._build_yellow(self.current_state_str)
             try:
                 traci.trafficlight.setRedYellowGreenState(self.tls_id, yellow_state)

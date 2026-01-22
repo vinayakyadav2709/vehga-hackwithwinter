@@ -77,9 +77,11 @@ class Normalizer:
         self.max_wait = 10000.0  # Increased significanty to prevent saturation
         self.max_speed = 30.0    
         self.max_vol = 50.0
+        self.max_emergency_count = 5.0
+        self.max_emergency_wait = 500.0  # Emergency vehicles should wait less
 
     def scale(self, features):
-        queue, wait, speed, vol, occ = features
+        queue, wait, speed, vol, occ, emg_count, emg_wait, has_emg = features
         
         # Log scaling helper
         def log_scale(val, max_val):
@@ -91,6 +93,9 @@ class Normalizer:
             min(speed / self.max_speed, 1.0), # Speed is naturally bounded
             min(log_scale(vol, self.max_vol), 1.0),
             occ,
+            min(log_scale(emg_count, self.max_emergency_count), 1.0),
+            min(log_scale(emg_wait, self.max_emergency_wait), 1.0),
+            has_emg,  # Already 0 or 1
         ]
 
 
@@ -112,6 +117,32 @@ def subscribe_lanes(lane_ids):
         except traci.exceptions.TraCIException as e:
              print(f"Warning: Could not subscribe to lane {lane_id}: {e}")
     # print(f"DEBUG: Subscribed to {len(lane_ids)} lanes.")
+
+def get_emergency_features(lane_ids):
+    """
+    Detect emergency vehicles on given lanes.
+    Returns: (emergency_count, emergency_wait_time, has_emergency)
+    """
+    emergency_count = 0
+    emergency_wait = 0.0
+    
+    for lane_id in lane_ids:
+        try:
+            vehicles = traci.lane.getLastStepVehicleIDs(lane_id)
+            for veh_id in vehicles:
+                try:
+                    vtype = traci.vehicle.getTypeID(veh_id)
+                    if vtype == "emergency":
+                        emergency_count += 1
+                        emergency_wait += traci.vehicle.getAccumulatedWaitingTime(veh_id)
+                except traci.exceptions.TraCIException:
+                    continue
+        except traci.exceptions.TraCIException:
+            continue
+    
+    has_emergency = 1.0 if emergency_count > 0 else 0.0
+    return emergency_count, emergency_wait, has_emergency
+
 
 def get_aggregated_features(lane_ids, normalizer=None):
     """
@@ -161,7 +192,10 @@ def get_aggregated_features(lane_ids, normalizer=None):
         avg_speed /= count
         avg_occ /= count
 
-    raw = [total_queue, total_wait, avg_speed, total_vol, avg_occ]
+    # Add emergency features
+    emg_count, emg_wait, has_emg = get_emergency_features(lane_ids)
+    
+    raw = [total_queue, total_wait, avg_speed, total_vol, avg_occ, emg_count, emg_wait, has_emg]
 
     if normalizer:
         return normalizer.scale(raw)
@@ -172,13 +206,17 @@ def get_aggregated_features(lane_ids, normalizer=None):
 def compute_reward(lane_ids, normalizer):
     """
     Encourages maintaining flow, not just clearing stopped cars.
+    Emergency vehicles are heavily prioritized with 10x penalty.
     """
     stats = get_aggregated_features(lane_ids, normalizer)
-    # stats = [queue, wait, speed, vol, occ] (normalized)
+    # stats = [queue, wait, speed, vol, occ, emg_count, emg_wait, has_emg] (normalized)
     
     # Heuristic weights for reward shaping
     r_queue = -1.0 * stats[0]
     r_wait = -1.0 * stats[1]
-    # r_speed =  0.5 * stats[2]
     
-    return r_queue + r_wait
+    # CRITICAL: Emergency vehicle penalty (10x normal)
+    # This heavily incentivizes the agent to clear emergency vehicles quickly
+    r_emergency_wait = -10.0 * stats[6]
+    
+    return r_queue + r_wait + r_emergency_wait
