@@ -1,0 +1,55 @@
+<routes>
+    <vType id="car" accel="2.6" decel="4.5" length="5.0" maxSpeed="50" color="200,200,200"/>
+    <vType id="special" accel="1.2" decel="3.5" length="7.0" maxSpeed="40" color="255,0,0" guiShape="bus"/>
+    <trip id="veh19" type="car" depart="0" from="-749128442#7" to="-825118129#1"/>
+    <trip id="veh24" type="car" depart="1" from="235957078#2" to="-749128442#6"/>
+    <trip id="veh39" type="car" depart="2" from="-787858372" to="-215089945"/>
+    <trip id="veh4" type="car" depart="2" from="749128442#5" to="-215089941"/>
+    <trip id="veh3" type="car" depart="6" from="-749128442#4" to="-749128442#3"/>
+    <trip id="veh31" type="car" depart="6" from="-215090045#0" to="749128442#6"/>
+    <trip id="veh12" type="car" depart="7" from="-749128442#3" to="825118129#2"/>
+    <trip id="veh46" type="car" depart="8" from="825118129#0" to="588859419#2"/>
+    <trip id="veh41" type="car" depart="12" from="-235957078#2" to="-749128442#3"/>
+    <trip id="veh16" type="car" depart="13" from="-1154579502" to="-215090045#2"/>
+    <trip id="veh33" type="car" depart="14" from="749128442#3" to="825118129#1"/>
+    <trip id="veh28" type="car" depart="16" from="749128442#5" to="-787858372"/>
+    <trip id="veh17" type="car" depart="17" from="-215090078#1" to="-215089941"/>
+    <trip id="veh42" type="car" depart="17" from="-215089904#5" to="-749128442#2"/>
+    <trip id="veh22" type="car" depart="20" from="749128442#4" to="825118129#0"/>
+    <trip id="veh30" type="car" depart="22" from="235957078#2" to="215089941"/>
+    <trip id="veh45" type="car" depart="25" from="749128442#7" to="215090045#0"/>
+    <trip id="veh8" type="car" depart="25" from="-235957078#2" to="215090045#0"/>
+    <trip id="veh21" type="car" depart="27" from="-1154579502" to="588859419#1"/>
+    <trip id="veh38" type="car" depart="28" from="-749128442#4" to="-215089904#5"/>
+    <trip id="veh0" type="car" depart="29" from="-235957078#2" to="749128442#5"/>
+    <trip id="veh1" type="car" depart="30" from="-787858372" to="787945997"/>
+    <trip id="veh25" type="car" depart="30" from="825118129#0" to="-215089904#5"/>
+    <trip id="veh26" type="car" depart="31" from="588859419#1" to="825118129#1"/>
+    <trip id="veh20" type="car" depart="32" from="-215090078#1" to="825118129#0"/>
+    <trip id="veh47" type="car" depart="33" from="-215090078#1" to="-825118129#0"/>
+    <trip id="veh5" type="car" depart="36" from="-215090045#0" to="-1154579502"/>
+    <trip id="veh48" type="car" depart="37" from="-588859419#1" to="-787858372"/>
+    <trip id="veh2" type="car" depart="38" from="1154579502" to="-787945997"/>
+    <trip id="veh43" type="car" depart="38" from="749128442#7" to="588859419#1"/>
+    <trip id="veh6" type="car" depart="39" from="215090078#1" to="749128442#7"/>
+    <trip id="special" type="special" depart="40" from="-1154579502" to="-215089904#5"/>
+    <trip id="veh18" type="car" depart="40" from="825118129#1" to="215090078#1"/>
+    <trip id="veh23" type="car" depart="40" from="749128442#5" to="-749128442#2"/>
+    <trip id="veh35" type="car" depart="47" from="-787858372" to="215089904#5"/>
+    <trip id="veh11" type="car" depart="48" from="588859419#1" to="-825118129#0"/>
+    <trip id="veh13" type="car" depart="60" from="-215090078#1" to="825118129#0"/>
+    <trip id="veh14" type="car" depart="68" from="787945997" to="215090045#0"/>
+    <trip id="veh15" type="car" depart="70" from="749128442#4" to="215089941"/>
+    <trip id="veh36" type="car" depart="75" from="787945997" to="-215089904#5"/>
+    <trip id="veh34" type="car" depart="91" from="749128442#3" to="749128442#2"/>
+    <trip id="veh27" type="car" depart="108" from="-215090078#1" to="787858372"/>
+    <trip id="veh32" type="car" depart="127" from="215089904#6" to="-787858372"/>
+    <trip id="veh37" type="car" depart="131" from="825118129#0" to="-787945997"/>
+    <trip id="veh9" type="car" depart="140" from="215090045#0" to="215089904#5"/>
+    <trip id="veh10" type="car" depart="141" from="-215090045#2" to="215089904#6"/>
+    <trip id="veh7" type="car" depart="142" from="-749128442#2" to="-588859419#2"/>
+    <trip id="veh29" type="car" depart="143" from="588859419#1" to="-825118129#0"/>
+    <trip id="veh44" type="car" depart="143" from="-749128442#4" to="-235957078#2"/>
+    <trip id="veh49" type="car" depart="145" from="-235957078#2" to="-825118129#3"/>
+    <trip id="veh40" type="car" depart="150" from="-215090045#0" to="215090045#2"/>
+</routes>

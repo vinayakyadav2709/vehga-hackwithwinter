@@ -1,0 +1,42 @@
+mode: sumo_events
+simulation:
+  sumo_config: coldplay3/osm.sumocfg
+  simulation_speed: 0.1
+  bounds:
+    min_lat: 52.52
+    max_lat: 52.531
+    min_lon: 13.385
+    max_lon: 13.405
+  max_steps: 7200
+model:
+  hidden_layers:
+  - 64
+  - 16
+fdrl:
+  yellow_time: 3
+  green_time: 30
+system:
+  server_host: localhost
+  server_port: 12345
+  max_roads: 4
+  controlled_junctions:
+  - '2245082596'
+  - '2245082608'
+  - '2245082669'
+  - '2245082715'
+  - '2245082732'
+  - '2245082742'
+  - '2245082777'
+  - '344890541'
+  - '7366702073'
+  - '7366702075'
+  - cluster_11182692495_7365923724
+  model_save_path: saved_models/universal_model.pth
+  log_file: training_logs.json
+  enable_patience: true
+  patience_epochs: 20
+  min_reward_delta: 0.05
+sumo_rl_events:
+  model_path: ./FDRL/saved_models
+  state_dim: 8
+  action_dim: 4

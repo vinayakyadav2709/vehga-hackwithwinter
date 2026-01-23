@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vegha Traffic Simulation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="controls">
+        <button class="btn" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="btn" onclick="resetSim()">↻</button>
+        <button class="btn" id="speedBtn" onclick="speedUp()">1x</button>
+        <div class="mode-switch" onclick="toggleMode()">
+            <span class="mode-label left" id="modeVegha">VEGHA</span>
+            <div class="switch-track">
+                <div class="switch-thumb" id="modeThumb"></div>
+            </div>
+            <span class="mode-label right" id="modeFixed">FIXED</span>
+        </div>
+    </div>
+
+    <!-- Status message container (kept for mode switch feedback) -->
+    <div id="statusMessage" class="status-message"
+        style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); z-index: 2000;"></div>
+
+    <script>
+        var currentMode = "vegha"; // default
+
+        var map = L.map('map', {
+            zoomControl: true,
+            attributionControl: false,
+            minZoom: 15,
+            maxZoom: 18,
+            maxBoundsViscosity: 1.0
+        }).setView([19.04194, 73.02667], 16);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var vehicles = {};
+        var trafficLights = {};
+        var socket = io();
+        var isPlaying = false;
+        var playSpeed = 1;
+
+        // ✅ Get icon size based on vehicle type
+        // ✅ Get icon size based on vehicle type (SCALED DOWN)
+        function getVehicleSize(type) {
+            // Reduced sizes by approx 30-40%
+            if (type === 'bus') return { width: 35, height: 18 };
+            if (type === 'truck') return { width: 32, height: 16 };
+            if (type === 'motorcycle') return { width: 20, height: 10 };
+            if (type === 'ambulance') return { width: 30, height: 15 };
+
+            // ✅ SPECIAL VEHICLE: Still 1.5x larger than the NEW default
+            // Default is 28, so 28 * 1.5 = 42
+            if (type === 'special') return { width: 56, height: 56 };
+
+            return { width: 28, height: 14 }; // Default passenger (Reduced from 40x20)
+        }
+
+        function getVehicleSVG(type, angle) {
+            var imgSrc = '';
+            var size = getVehicleSize(type);
+
+            if (type === 'bus') imgSrc = 'images/bus.png';
+            else if (type === 'truck') imgSrc = 'images/truck.png';
+            else if (type === 'motorcycle') imgSrc = 'images/bike.png';
+            else if (type === 'ambulance') imgSrc = 'images/ambulance.png';
+            else if (type === "special") imgSrc = 'images/ambulance.png';
+            else imgSrc = 'images/car.png';
+
+            var cssAngle = angle;
+
+            return `
+                <svg width="${size.width}" height="${size.height}"
+                    viewBox="0 0 ${size.width} ${size.height}"
+                    style="transform: rotate(${cssAngle}deg); transform-origin: center center; overflow: visible; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                    <image href="${imgSrc}" x="0" y="0" width="${size.width}" height="${size.height}"
+                        onerror="console.error('Failed to load: ${imgSrc}')" />
+                </svg>
+            `;
+        }
+
+        function toggleMode() {
+            var newMode = currentMode === "vegha" ? "fixed" : "vegha";
+
+            fetch('/api/mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: newMode })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Mode switch failed");
+                    return res.json();
+                })
+                .then(data => {
+                    currentMode = newMode;
+                    updateModeButton();
+                    showStatus('success', data.message);
+                })
+                .catch(err => {
+                    console.error(err);
+                    showStatus('error', 'Failed to change mode');
+                });
+        }
+
+        function updateModeButton() {
+            var container = document.querySelector('.mode-switch');
+            container.classList.remove('mode-vegha', 'mode-fixed');
+            if (currentMode === "vegha") {
+                container.classList.add('mode-vegha');
+            } else {
+                container.classList.add('mode-fixed');
+            }
+        }
+
+        fetch('/api/mode')
+            .then(res => res.json())
+            .then(data => {
+                if (data.mode) {
+                    currentMode = data.mode;
+                    updateModeButton();
+                }
+            })
+            .catch(err => console.error('Failed to fetch mode:', err));
+
+        socket.on('update', function (data) {
+            // --- Update Vehicles ---
+            for (var id in data.vehicles) {
+                var veh = data.vehicles[id];
+                var lon = veh.pos[0];
+                var lat = veh.pos[1];
+                var angle = veh.angle || 0;
+                var type = veh.type;
+
+                var size = getVehicleSize(type);
+                var icon = L.divIcon({
+                    html: getVehicleSVG(type, angle),
+                    className: 'vehicle-icon',
+                    iconSize: [size.width, size.height],
+                    iconAnchor: [size.width / 2, size.height / 2]
+                });
+
+                // ✅ Z-INDEX LOGIC: Special vehicles get very high z-index
+                var zIndex = (type === 'special') ? 2000 : 100;
+
+                if (!vehicles[id]) {
+                    vehicles[id] = L.marker([lat, lon], {
+                        icon: icon,
+                        zIndexOffset: zIndex
+                    }).addTo(map);
+                } else {
+                    vehicles[id].setIcon(icon);
+                    vehicles[id].setLatLng([lat, lon]);
+                    vehicles[id].setZIndexOffset(zIndex);
+                }
+            }
+
+            // --- Remove Missing Vehicles ---
+            for (var id in vehicles) {
+                if (!data.vehicles[id]) {
+                    map.removeLayer(vehicles[id]);
+                    delete vehicles[id];
+                }
+            }
+
+            // --- Update Traffic Lights ---
+            for (var tlId in data.traffic_lights) {
+                var tl = data.traffic_lights[tlId];
+                if (!tl.pos || tl.pos.length !== 2) return;
+
+                var lon = tl.pos[0];
+                var lat = tl.pos[1];
+                var state = tl.state;
+                var angle = tl.angle || 0;
+                var color = state === 'green' ? '#00ff00' : (state === 'yellow' ? '#ffff00' : '#ff0000');
+
+                if (!trafficLights[tlId]) {
+                    var icon = L.divIcon({
+                        html: `<div class="traffic-light-line" style="background: ${color}; color: ${color}; transform: rotate(${angle}deg);"></div>`,
+                        className: '',
+                        iconSize: [30, 4],
+                        iconAnchor: [15, 2]
+                    });
+                    trafficLights[tlId] = L.marker([lat, lon], { icon: icon, zIndexOffset: 1000 }).addTo(map);
+                } else {
+                    var icon = L.divIcon({
+                        html: `<div class="traffic-light-line" style="background: ${color}; color: ${color}; transform: rotate(${angle}deg);"></div>`,
+                        className: '',
+                        iconSize: [30, 4],
+                        iconAnchor: [15, 2]
+                    });
+                    trafficLights[tlId].setIcon(icon);
+                }
+            }
+        });
+
+        socket.on('streets_loaded', function (data) {
+            var allCoords = [];
+            if (data.streets_with_coords && data.streets_with_coords.length > 0) {
+                data.streets_with_coords.forEach(function (street) {
+                    street.coordinates.forEach(function (coord) {
+                        allCoords.push(coord);
+                    });
+                });
+            }
+            // Auto-center logic
+            if (allCoords.length > 0) {
+                var bounds = L.latLngBounds(allCoords);
+                map.fitBounds(bounds);
+            }
+        });
+
+        function showStatus(type, message) {
+            var statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = 'status-message ' + type;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            setTimeout(function () {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            var btn = document.getElementById('playBtn');
+            if (isPlaying) {
+                btn.textContent = '⏸';
+                btn.classList.add('active');
+                socket.emit('start');
+            } else {
+                btn.textContent = '▶';
+                btn.classList.remove('active');
+                socket.emit('pause');
+            }
+        }
+
+        function resetSim() {
+            socket.emit('reset');
+            for (var id in vehicles) map.removeLayer(vehicles[id]);
+            for (var id in trafficLights) map.removeLayer(trafficLights[id]);
+            vehicles = {};
+            trafficLights = {};
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = '▶';
+            document.getElementById('playBtn').classList.remove('active');
+        }
+
+        function speedUp() {
+            playSpeed = playSpeed >= 3 ? 0.5 : playSpeed + 0.5;
+            socket.emit('speed', { speed: playSpeed });
+            document.getElementById('speedBtn').textContent = playSpeed + 'x';
+        }
+    </script>
+</body>
+
+</html>

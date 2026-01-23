@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-01-23T03:40:18.628703+05:30 by Eclipse SUMO sumo 1.25.0
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="coldplay2/osm2.net.xml.gz"/>
+        <route-files value="coldplay2/   osm.passenger.trips_scaled.xml,coldplay2/   osm.motorcycle.trips_scaled.xml,coldplay2/   osm.bus.trips_scaled.xml,coldplay2/   osm.truck.trips_scaled.xml"/>
+        <additional-files value="coldplay2/osm.poly.xml.gz,coldplay2/output.add.xml,coldplay2/rl_traffic_lights.add.xml"/>
+    </input>
+
+    <output>
+        <tripinfo-output value="coldplay2/tripinfos.xml"/>
+        <statistic-output value="coldplay2/stats.xml"/>
+    </output>
+
+    <processing>
+        <ignore-route-errors value="true"/>
+        <tls.actuated.jam-threshold value="30"/>
+    </processing>
+
+    <routing>
+        <device.rerouting.adaptation-steps value="18"/>
+        <device.rerouting.adaptation-interval value="10"/>
+    </routing>
+
+    <report>
+        <verbose value="true"/>
+        <duration-log.statistics value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <traci_server>
+        <remote-port value="46393"/>
+    </traci_server>
+
+    <gui_only>
+        <gui-settings-file value="coldplay2/osm.view.xml"/>
+        <quit-on-end value="true"/>
+    </gui_only>
+
+</sumoConfiguration>
+-->
+
+<meandata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/meandata_file.xsd">
+</meandata>

@@ -1,0 +1,33 @@
+mode: "sumo_events"
+
+simulation:
+  sumo_config: "coldplay3/osm.sumocfg"
+  simulation_speed: 0.1
+  bounds:
+    min_x: 200
+    max_x: 400
+    min_y: 1350
+    max_y: 1550
+  max_steps: 3600
+
+model:
+  hidden_layers: [64, 16]
+
+fdrl:
+  yellow_time: 3
+  green_time: 30
+
+system:
+  server_host: localhost
+  server_port: 12345
+  max_roads: 5
+  model_save_path: saved_models/cropped_model.pth
+  log_file: training_logs.json
+  enable_patience: true
+  patience_epochs: 20
+  min_reward_delta: 0.05
+
+sumo_rl_events:
+  model_path: "./FDRL/saved_models"
+  state_dim: 8
+  action_dim: 4
